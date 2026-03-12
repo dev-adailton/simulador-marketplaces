@@ -1,0 +1,759 @@
+html = '''<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulador de Preço PRO 3.3</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#16325c;
+  --primary2:#1f4d8f;
+  --accent:#0ea5e9;
+  --success:#10b981;
+  --danger:#ef4444;
+  --warning:#f59e0b;
+  --purple:#8b5cf6;
+  --bg:#eef3f8;
+  --card:#fff;
+  --text:#1e293b;
+  --muted:#64748b;
+  --border:#dbe4ee;
+  --input:#f8fafc;
+  --shadow:0 8px 30px rgba(15,23,42,0.08);
+  --radius:16px;
+}
+body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);padding:24px;color:var(--text);min-height:100vh}
+.container{max-width:1400px;margin:auto}
+
+/* TOPBAR */
+.topbar{text-align:center;margin-bottom:28px}
+.vtag{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:6px 16px;border-radius:999px;margin-bottom:10px}
+.topbar h1{font-size:28px;color:var(--primary);font-weight:900;margin-bottom:4px}
+.topbar p{color:var(--muted);font-size:13px}
+
+/* TABS */
+.tabs{display:flex;gap:8px;justify-content:center;margin-bottom:22px;flex-wrap:wrap}
+.tab{padding:9px 22px;border-radius:999px;border:1.5px solid var(--border);background:#fff;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);transition:.2s}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tab:hover:not(.active){background:var(--bg)}
+.panel{display:none}.panel.active{display:block}
+
+/* CARD */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+.card-header{background:linear-gradient(135deg,var(--primary),var(--primary2));padding:16px 22px;display:flex;align-items:center;gap:12px}
+.card-header .icon{width:36px;height:36px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.card-header h2{color:#fff;font-size:15px;font-weight:800}
+.card-header p{color:rgba(255,255,255,.65);font-size:12px;margin-top:2px}
+.card-body{padding:22px}
+
+/* SIMULADOR LAYOUT */
+.sim-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:start}
+
+/* FIELDS */
+.stitle{font-size:11px;color:var(--muted);font-weight:800;letter-spacing:1px;text-transform:uppercase;margin:14px 0 12px;display:flex;align-items:center;gap:8px}
+.stitle::after{content:"";flex:1;height:1px;background:var(--border)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:12px;color:var(--muted);font-weight:700}
+.iw{position:relative}
+.iw input{width:100%;height:42px;border:1.5px solid var(--border);border-radius:10px;background:var(--input);padding:0 12px;font-size:14px;font-weight:700;color:var(--text);outline:none;transition:.2s}
+.iw input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(14,165,233,.1)}
+.iw .pre{position:absolute;top:50%;left:11px;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--muted);pointer-events:none}
+.iw .suf{position:absolute;top:50%;right:11px;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--muted);pointer-events:none}
+.iw.wp input{padding-left:28px}
+.iw.ws input{padding-right:28px}
+
+/* BOTOES */
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{flex:1;min-width:110px;border:none;border-radius:10px;padding:11px 12px;font-size:13px;font-weight:800;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary2);transform:translateY(-1px)}
+.btn-secondary{background:#f1f5f9;color:var(--text);border:1.5px solid var(--border)}
+.btn-secondary:hover{background:var(--border)}
+.btn-success{background:var(--success);color:#fff}
+.btn-accent{background:var(--accent);color:#fff}
+
+/* RESULTADOS */
+.results{display:flex;flex-direction:column;gap:14px}
+.hero{background:linear-gradient(135deg,var(--primary),var(--primary2));border-radius:var(--radius);padding:24px 20px;text-align:center;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;top:-40px;right:-40px;width:150px;height:150px;background:rgba(255,255,255,.05);border-radius:50%}
+.hero small{display:block;text-transform:uppercase;letter-spacing:1.2px;font-size:11px;font-weight:800;color:rgba(255,255,255,.65);margin-bottom:6px}
+.hero .price{font-size:38px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;position:relative;z-index:1}
+.hero .sub{font-size:12px;color:rgba(255,255,255,.6)}
+.manual-badge{display:none;background:#f59e0b;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:6px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
+.stat .slabel{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px}
+.stat .svalue{font-size:18px;font-weight:900}
+.stat .sicon{font-size:18px;margin-bottom:4px}
+.blue{color:var(--accent)}.green{color:var(--success)}.red{color:var(--danger)}.orange{color:var(--warning)}.purple{color:var(--purple)}
+
+/* BREAKDOWN */
+.breakdown{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.bk-header{padding:13px 18px;border-bottom:1px solid var(--border);font-size:13px;font-weight:800;color:var(--primary);background:#fbfdff}
+.bk-row{display:flex;justify-content:space-between;align-items:center;padding:11px 18px;border-bottom:1px solid var(--border);font-size:13px;transition:.15s}
+.bk-row:last-child{border:none}
+.bk-row:hover{background:#f8fafc}
+.bk-row .rl{display:flex;align-items:center;gap:8px;color:var(--muted)}
+.bk-row .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.bk-row .rv{font-weight:800;color:var(--text)}
+.bk-total{background:#eff8ff}
+.bk-total .rl{color:var(--primary);font-weight:800}
+.bk-total .rv{color:var(--primary);font-size:15px}
+
+/* CHART */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.chart-card .ch{padding:13px 18px;border-bottom:1px solid var(--border);font-weight:800;color:var(--primary);font-size:13px}
+.chart-card .cb{padding:18px;display:flex;justify-content:center}
+.empty{padding:28px 20px;text-align:center;color:var(--muted);font-size:14px}
+.empty .ei{font-size:30px;margin-bottom:6px}
+
+/* CUSTO BLOCO */
+.custo-bloco{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:20px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
+.custo-bloco-title{font-size:13px;font-weight:800;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
+.custo-bloco-title::after{content:"";flex:1;height:1px;background:var(--border)}
+.custo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.custo-item{border-radius:10px;padding:12px 10px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.custo-item .ci-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;opacity:.85}
+.custo-item .ci-valor{font-size:15px;font-weight:900;word-break:break-all}
+.custo-item .ci-pct{font-size:11px;margin-top:4px;opacity:.8;font-weight:700}
+.ci-blue{background:#eff8ff;color:#0369a1;border:1px solid #bae6fd}
+.ci-indigo{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
+.ci-violet{background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe}
+.ci-amber{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.custo-item-total{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;grid-column:1/-1;display:flex;flex-direction:row;align-items:center;justify-content:space-between;padding:16px 24px}
+.custo-item-total .ci-label{font-size:13px;opacity:.9;margin-bottom:0}
+.custo-item-total .ci-valor{font-size:22px;margin:0 10px;flex:1;text-align:right}
+.custo-item-total .ci-pct{font-size:14px;opacity:.9;margin-top:0}
+
+/* RANKING */
+.ranking-bloco{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:18px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
+.ranking-title{font-size:13px;font-weight:800;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
+.ranking-title::after{content:"";flex:1;height:1px;background:var(--border)}
+.ranking-list{display:flex;flex-direction:column;gap:8px}
+.ranking-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:10px;border:1px solid var(--border)}
+.ranking-row .pos{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;flex-shrink:0}
+.pos-1{background:#f59e0b;color:#fff}.pos-2{background:#94a3b8;color:#fff}.pos-3{background:#b45309;color:#fff}.pos-rest{background:#f1f5f9;color:var(--muted)}
+.ranking-row .rname{font-weight:800;font-size:13px;flex:1}
+.ranking-row .rpreco{font-size:13px;color:var(--accent);font-weight:800}
+.ranking-row .rlucro{font-size:13px;font-weight:800}
+.ranking-row .rmargem{font-size:11px;color:var(--muted);font-weight:700}
+
+/* MP GRID */
+.mp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.mp-col{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 4px 12px rgba(0,0,0,.04)}
+.mp-head{padding:13px;text-align:center;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;gap:8px}
+.mp-body{padding:14px;flex:1;display:flex;flex-direction:column;gap:10px}
+.mp-input-group{display:flex;flex-direction:column;gap:5px}
+.mp-input-group label{font-size:11px;color:var(--muted);font-weight:700;text-align:center}
+.mp-input-group input{width:100%;height:36px;border:1px solid var(--border);border-radius:8px;text-align:center;font-weight:700;color:var(--text);background:var(--input);outline:none;font-size:14px}
+.mp-input-group input:focus{border-color:var(--primary);background:#fff}
+.mp-result-box{background:#f8fafc;border-radius:8px;padding:10px;text-align:center;display:flex;flex-direction:column;justify-content:center;border:1px solid #f1f5f9}
+.mp-result-box .label{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.4px}
+.mp-result-box .val{font-size:15px;font-weight:800}
+
+/* NOVO 3.3 — comparativo preco original vs campanha */
+.mp-compare-box{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;border:1.5px solid var(--border);background:#fff;margin-top:2px}
+.mp-compare-box .cb-title{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
+.mp-compare-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.mp-compare-row .cr-label{color:var(--muted);font-weight:700}
+.mp-compare-row .cr-val{font-weight:800}
+.mp-compare-row .cr-val.original{color:var(--muted);text-decoration:line-through;font-size:11px}
+.mp-compare-row .cr-val.campanha{color:var(--accent);font-size:14px}
+.mp-compare-row .cr-val.perda-ok{color:var(--warning)}
+.mp-compare-row .cr-val.perda-bad{color:var(--danger)}
+
+/* ALERTA PREJUÍZO */
+.mp-alerta{border-radius:10px;padding:10px 14px;font-size:12px;font-weight:700;text-align:center;display:none;margin-top:2px}
+.mp-alerta.alerta-prejuizo{background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;display:block}
+.mp-alerta.alerta-atencao{background:#fef9c3;color:#854d0e;border:1.5px solid #fde047;display:block}
+.mp-alerta.alerta-ok{background:#d1fae5;color:#065f46;border:1.5px solid #6ee7b7;display:block}
+
+.badge-lucro{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;margin-top:4px}
+.badge-ok{background:#d1fae5;color:#065f46}
+.badge-bad{background:#fee2e2;color:#991b1b}
+
+/* PRODUTO HEADER */
+.mp-product-header{background:linear-gradient(135deg,var(--success),#059669);color:#fff;font-weight:900;font-size:17px;text-align:center;padding:14px;border-radius:12px;margin-bottom:16px;letter-spacing:.5px;box-shadow:0 4px 12px rgba(16,185,129,.3)}
+.mp-product-header.empty-header{background:#f1f5f9;color:var(--muted);font-size:13px;font-weight:600;box-shadow:none}
+
+/* HISTORICO */
+.hist-table{width:100%;border-collapse:collapse;font-size:13px}
+.hist-table th{background:var(--primary);color:#fff;padding:10px 14px;text-align:left;font-weight:700;font-size:12px}
+.hist-table td{padding:10px 14px;border-bottom:1px solid var(--border)}
+.hist-table tr:hover td{background:#f8fafc}
+.hist-empty{padding:32px;text-align:center;color:var(--muted)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--primary);color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.2);transform:translateY(60px);opacity:0;transition:.35s cubic-bezier(.4,0,.2,1);z-index:9999}
+.toast.show{transform:translateY(0);opacity:1}
+
+@media(max-width:1100px){.sim-layout{grid-template-columns:1fr}}
+@media(max-width:700px){.mp-grid,.grid2,.stats{grid-template-columns:1fr}.btn{min-width:unset}.topbar h1{font-size:22px}.custo-item-total{flex-direction:column;text-align:center;gap:10px}.custo-item-total .ci-valor{text-align:center}}
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="vtag">🚀 Versão 3.3 PRO</div>
+  <h1>Simulador de Preço de Venda PRO 3.3</h1>
+  <p>Precificação inteligente · Comparativo Original vs Campanha · Alerta de Prejuízo · Ranking de Lucratividade</p>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="mudarAba('simulador',this)">🧮 Simulador</div>
+  <div class="tab" onclick="mudarAba('marketplaces',this)">🛒 Marketplaces</div>
+  <div class="tab" onclick="mudarAba('historico',this)">📋 Histórico</div>
+</div>
+
+<!-- ===== ABA SIMULADOR ===== -->
+<div class="panel active" id="panel-simulador">
+<div class="sim-layout">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">📦</div>
+      <div><h2>Parâmetros de Precificação</h2><p>Preencha os campos para cálculo automático</p></div>
+    </div>
+    <div class="card-body">
+
+      <div class="stitle">📝 Identificação</div>
+      <div class="field">
+        <label>Nome do Produto</label>
+        <div class="iw"><input type="text" id="nomeProduto" placeholder="Ex: Smartphone Samsung Galaxy" oninput="calcularAll()"></div>
+      </div>
+
+      <div class="stitle">🛒 Custos de Compra</div>
+      <div class="grid2">
+        <div class="field"><label>Custo de Compra</label>
+          <div class="iw"><input type="number" id="custo" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div></div>
+        <div class="field"><label>Taxa de Câmbio</label>
+          <div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1" placeholder="1.0000" min="0" step="0.0001" oninput="calcularAll()"></div></div>
+        <div class="field"><label>Frete de Compra (%)</label>
+          <div class="iw ws"><input type="number" id="freteCompra" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+        <div class="field"><label>Outras Despesas (R$)</label>
+          <div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div></div>
+        <div class="field"><label>Outras Despesas (%)</label>
+          <div class="iw ws"><input type="number" id="outrasPct" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+      </div>
+
+      <div class="stitle">💰 Venda & Tributação</div>
+      <div class="grid2">
+        <div class="field"><label>Margem de Venda (%)</label>
+          <div class="iw ws"><input type="number" id="margem" placeholder="0.00" min="0" max="99" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+        <div class="field"><label>Impostos (%)</label>
+          <div class="iw ws"><input type="number" id="impostos" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+        <div class="field"><label>Frete de Venda (R$)</label>
+          <div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div></div>
+        <div class="field"><label>Comissão da Plataforma (%)</label>
+          <div class="iw ws"><input type="number" id="comissao" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+      </div>
+
+      <div class="stitle">🔀 Simulação Manual</div>
+      <div class="grid2">
+        <div class="field"><label>Preço Manual (opcional)</label>
+          <div class="iw wp"><span class="pre">R$</span><input type="number" id="precoManual" placeholder="Opcional" min="0" step="0.01" oninput="calcularAll()"></div></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="calcularAll()">⚡ Calcular</button>
+        <button class="btn btn-success" onclick="salvarHistorico()">💾 Salvar</button>
+        <button class="btn btn-accent" onclick="copiarResultado()">📋 Copiar</button>
+        <button class="btn btn-secondary" onclick="exportarPDF()">📄 PDF</button>
+        <button class="btn btn-secondary" onclick="limpar()">🗑️ Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="results" id="pdf-area">
+    <div class="hero">
+      <small>💵 Preço de Venda Sugerido</small>
+      <div class="price" id="precoVenda">R$ —</div>
+      <div class="sub" id="heroSub">Preencha os campos ao lado</div>
+      <div class="manual-badge" id="manualBadge">⚠️ Preço manual ativo</div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="sicon">📦</div><div class="slabel">Custo Total</div><div class="svalue blue" id="sCusto">R$ —</div></div>
+      <div class="stat"><div class="sicon">📈</div><div class="slabel">Valor da Margem</div><div class="svalue green" id="sMargem">R$ —</div></div>
+      <div class="stat"><div class="sicon">💸</div><div class="slabel">Lucro Líquido</div><div class="svalue green" id="sLucro">R$ —</div></div>
+      <div class="stat"><div class="sicon">📊</div><div class="slabel">Margem Real</div><div class="svalue orange" id="sMargemReal">— %</div></div>
+    </div>
+    <div class="chart-card">
+      <div class="ch">🥧 Composição do Preço</div>
+      <div class="cb" id="chartArea"><div class="empty"><div class="ei">📊</div><p>Preencha os campos para ver o gráfico</p></div></div>
+    </div>
+    <div class="breakdown">
+      <div class="bk-header">📋 Detalhamento Completo</div>
+      <div id="bkContent"><div class="empty"><div class="ei">🔢</div><p>Preencha os campos para ver o detalhamento</p></div></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ===== ABA MARKETPLACES ===== -->
+<div class="panel" id="panel-marketplaces">
+<div class="card">
+  <div class="card-header">
+    <div class="icon">🛒</div>
+    <div><h2>Simulação por Marketplace</h2><p>Preço Original vs Campanha · Alerta de Prejuízo · Ranking de Lucratividade</p></div>
+  </div>
+  <div class="card-body">
+
+    <div id="mpProductHeader" class="mp-product-header empty-header">📦 Digite o nome do produto no Simulador</div>
+
+    <div class="custo-bloco">
+      <div class="custo-bloco-title">📊 Composição do Custo Final do Produto</div>
+      <div id="custoGrid" class="custo-grid">
+        <div class="empty" style="grid-column:1/-1"><div class="ei">🔢</div><p>Calcule no simulador para ver os custos</p></div>
+      </div>
+    </div>
+
+    <div class="ranking-bloco">
+      <div class="ranking-title">🏆 Ranking de Lucratividade por Marketplace</div>
+      <div id="rankingList" class="ranking-list">
+        <div class="empty"><div class="ei">📈</div><p>Calcule no simulador para ver o ranking</p></div>
+      </div>
+    </div>
+
+    <!-- LINHA 1 -->
+    <div style="margin:20px 0 10px"><div class="stitle">Linha 1 — Simulação Principal</div></div>
+    <div class="mp-grid">
+
+      <div class="mp-col">
+        <div class="mp-head" style="background:#ffe600;color:#333">🛒 Mercado Livre</div>
+        <div class="mp-body">
+          <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_ml1" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_ml1" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_ml1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-compare-box">
+            <div class="cb-title">📊 Original vs Campanha</div>
+            <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_ml1">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_ml1">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_ml1">—</span></div>
+          </div>
+          <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_ml1">—</div><div id="mktBadge_ml1" class="badge-lucro" style="display:none"></div></div>
+          <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargem_ml1">—</div></div>
+          <div class="mp-alerta" id="mktAlerta_ml1"></div>
+        </div>
+      </div>
+
+      <div class="mp-col">
+        <div class="mp-head" style="background:#0086ff;color:#fff">🛍️ Magalu</div>
+        <div class="mp-body">
+          <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_mag1" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_mag1" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_mag1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-compare-box">
+            <div class="cb-title">📊 Original vs Campanha</div>
+            <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_mag1">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_mag1">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_mag1">—</span></div>
+          </div>
+          <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_mag1">—</div><div id="mktBadge_mag1" class="badge-lucro" style="display:none"></div></div>
+          <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargem_mag1">—</div></div>
+          <div class="mp-alerta" id="mktAlerta_mag1"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- LINHA 2 -->
+    <div style="margin:20px 0 10px"><div class="stitle">Linha 2 — Simulação Alternativa</div></div>
+    <div class="mp-grid">
+
+      <div class="mp-col">
+        <div class="mp-head" style="background:#ffe600;color:#333">🛒 Mercado Livre</div>
+        <div class="mp-body">
+          <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_ml2" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_ml2" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_ml2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-compare-box">
+            <div class="cb-title">📊 Original vs Campanha</div>
+            <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_ml2">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_ml2">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_ml2">—</span></div>
+          </div>
+          <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_ml2">—</div><div id="mktBadge_ml2" class="badge-lucro" style="display:none"></div></div>
+          <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargem_ml2">—</div></div>
+          <div class="mp-alerta" id="mktAlerta_ml2"></div>
+        </div>
+      </div>
+
+      <div class="mp-col">
+        <div class="mp-head" style="background:#0086ff;color:#fff">🛍️ Magalu</div>
+        <div class="mp-body">
+          <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_mag2" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_mag2" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_mag2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+          <div class="mp-compare-box">
+            <div class="cb-title">📊 Original vs Campanha</div>
+            <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_mag2">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_mag2">—</span></div>
+            <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_mag2">—</span></div>
+          </div>
+          <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_mag2">—</div><div id="mktBadge_mag2" class="badge-lucro" style="display:none"></div></div>
+          <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargem_mag2">—</div></div>
+          <div class="mp-alerta" id="mktAlerta_mag2"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ===== ABA HISTÓRICO ===== -->
+<div class="panel" id="panel-historico">
+<div class="card">
+  <div class="card-header">
+    <div class="icon">📋</div>
+    <div><h2>Histórico de Simulações</h2><p>Simulações salvas nesta sessão</p></div>
+  </div>
+  <div class="card-body">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+      <button class="btn btn-secondary" style="max-width:180px" onclick="limparHistorico()">🗑️ Limpar Histórico</button>
+    </div>
+    <div id="histContent"><div class="hist-empty">Nenhuma simulação salva ainda.</div></div>
+  </div>
+</div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id)
+const v = id => { const x = parseFloat($(id).value); return isNaN(x) ? 0 : x }
+const moeda = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
+const pct   = n => Number(n).toFixed(2).replace('.',',') + '%'
+const now   = () => new Date().toLocaleString('pt-BR')
+
+let chartInstance = null
+let historico     = []
+let lastCalc      = null
+
+function toast(msg, dur=2800){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),dur)
+}
+
+function mudarAba(aba,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
+  el.classList.add('active')
+  $('panel-'+aba).classList.add('active')
+}
+
+function calcularAll(){
+  calcular()
+  calcularMarketplaces()
+  atualizarHeaderProduto()
+}
+
+function calcular(){
+  const custo     = v('custo')
+  const cambio    = v('cambio')||1
+  const freteCPct = v('freteCompra')
+  const outrasRS  = v('outrasReais')
+  const outrasPct = v('outrasPct')
+  const margem    = v('margem')
+  const impostos  = v('impostos')
+  const freteV    = v('freteVenda')
+  const comissao  = v('comissao')
+  const manual    = v('precoManual')
+
+  if(custo===0&&freteV===0&&outrasRS===0){resetUI();return}
+
+  const custoBRL       = custo*cambio
+  const freteCompraVal = custoBRL*(freteCPct/100)
+  const base           = custoBRL+freteCompraVal+outrasRS
+  const outrasVal      = base*(outrasPct/100)
+  const custoTotal     = base+outrasVal
+  const taxa           = (margem+impostos+comissao)/100
+
+  if(taxa>=1){$('precoVenda').textContent='Inválido';return}
+
+  let preco=(custoTotal+freteV)/(1-taxa)
+  const modoManual=manual>0
+  if(modoManual) preco=manual
+
+  const valMargem   = preco*(margem/100)
+  const valImp      = preco*(impostos/100)
+  const valComissao = preco*(comissao/100)
+  const lucro       = preco-custoTotal-freteV-valImp-valComissao
+  const margemReal  = preco>0?(lucro/preco)*100:0
+
+  lastCalc={custo,custoBRL,freteCompraVal,outrasRS,outrasVal,custoTotal,freteV,valImp,valComissao,valMargem,preco,lucro,margemReal,margem,impostos,comissao,freteCPct,outrasPct,cambio}
+
+  $('precoVenda').textContent    = moeda(preco)
+  $('heroSub').textContent       = `Custo total: ${moeda(custoTotal)} · Margem: ${pct(margem)}`
+  $('manualBadge').style.display = modoManual?'inline-block':'none'
+  $('sCusto').textContent        = moeda(custoTotal)
+  $('sMargem').textContent       = moeda(valMargem)
+  const lEl=$('sLucro'); lEl.textContent=moeda(lucro); lEl.className='svalue '+(lucro>=0?'green':'red')
+  $('sMargemReal').textContent   = pct(margemReal)
+
+  const rows=[
+    {dot:'#0ea5e9',label:'Custo Produto (BRL)',                 val:custoBRL},
+    {dot:'#6366f1',label:`Frete de Compra (${pct(freteCPct)})`, val:freteCompraVal},
+    {dot:'#8b5cf6',label:'Outras Despesas (R$)',                 val:outrasRS},
+    {dot:'#a78bfa',label:`Outras Despesas (${pct(outrasPct)})`,  val:outrasVal},
+    {dot:'#f59e0b',label:'Frete de Venda',                       val:freteV},
+    {dot:'#ef4444',label:`Impostos (${pct(impostos)})`,          val:valImp},
+    {dot:'#f97316',label:`Comissão (${pct(comissao)})`,          val:valComissao},
+    {dot:'#10b981',label:`Margem (${pct(margem)})`,              val:valMargem}
+  ].filter(r=>r.val>0)
+
+  let bk=rows.map(r=>`<div class="bk-row"><span class="rl"><span class="dot" style="background:${r.dot}"></span>${r.label}</span><span class="rv">${moeda(r.val)}</span></div>`).join('')
+  bk+=`<div class="bk-row bk-total"><span class="rl">💰 Preço de Venda Final</span><span class="rv">${moeda(preco)}</span></div>`
+  $('bkContent').innerHTML=bk
+
+  renderChart(
+    ['Custo','Frete Compra','Outras Desp','Frete Venda','Impostos','Comissão','Lucro'],
+    [custoBRL,freteCompraVal,outrasRS+outrasVal,freteV,valImp,valComissao,Math.max(lucro,0)],
+    ['#0ea5e9','#6366f1','#8b5cf6','#f59e0b','#ef4444','#f97316','#10b981']
+  )
+  atualizarBlocoCustos()
+}
+
+function atualizarBlocoCustos(){
+  if(!lastCalc){$('custoGrid').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ei">🔢</div><p>Calcule no simulador</p></div>';return}
+  const c=lastCalc, total=c.custoTotal, itens=[]
+  if(c.custo>0)          itens.push({label:'Custo Compra',     text:moeda(c.custo),          pct:'-',                                              cls:'ci-blue',   icon:'🛒'})
+  if(c.cambio!==1)       itens.push({label:'Taxa Câmbio',      text:'× '+Number(c.cambio).toLocaleString('pt-BR',{maximumFractionDigits:4}), pct:'-', cls:'ci-blue', icon:'💱'})
+  if(c.custoBRL>0)       itens.push({label:c.cambio!==1?'Custo Convertido':'Custo Original', text:moeda(c.custoBRL), pct:total>0?pct((c.custoBRL/total)*100):'-', cls:'ci-blue', icon:'📦'})
+  if(c.freteCompraVal>0) itens.push({label:'Frete Compra',     text:moeda(c.freteCompraVal),  pct:total>0?pct((c.freteCompraVal/total)*100):'-',   cls:'ci-indigo', icon:'🚚'})
+  if(c.outrasRS>0)       itens.push({label:'Outras Desp R$',   text:moeda(c.outrasRS),         pct:total>0?pct((c.outrasRS/total)*100):'-',         cls:'ci-violet', icon:'📋'})
+  if(c.outrasVal>0)      itens.push({label:'Outras Desp %',    text:moeda(c.outrasVal),         pct:total>0?pct((c.outrasVal/total)*100):'-',        cls:'ci-violet', icon:'📋'})
+  if(c.freteV>0)         itens.push({label:'Frete Venda',      text:moeda(c.freteV),            pct:total>0?pct((c.freteV/total)*100):'-',           cls:'ci-amber',  icon:'🚛'})
+  let html=itens.map(i=>`<div class="custo-item ${i.cls}"><div class="ci-label">${i.icon} ${i.label}</div><div class="ci-valor">${i.text}</div><div class="ci-pct">${i.pct}</div></div>`).join('')
+  html+=`<div class="custo-item custo-item-total"><div class="ci-label">🏁 CUSTO FINAL DO PRODUTO</div><div class="ci-valor">${moeda(total)}</div><div class="ci-pct">100%</div></div>`
+  $('custoGrid').innerHTML=html
+}
+
+function atualizarHeaderProduto(){
+  const nome=$('nomeProduto').value.trim(), h=$('mpProductHeader')
+  if(nome){h.textContent='📦 '+nome.toUpperCase();h.classList.remove('empty-header')}
+  else{h.textContent='📦 Digite o nome do produto no Simulador';h.classList.add('empty-header')}
+}
+
+function renderChart(labels,data,colors){
+  $('chartArea').innerHTML='<canvas id="grafico" style="max-width:240px;max-height:240px;"></canvas>'
+  if(chartInstance) chartInstance.destroy()
+  chartInstance=new Chart($('grafico'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:10}},tooltip:{callbacks:{label:ctx=>` ${moeda(ctx.parsed)}`}}},cutout:'60%'}
+  })
+}
+
+function calcularMarketplaces(){
+  if(!lastCalc) return
+  const ids=['ml1','mag1','ml2','mag2']
+  const resultados=[]
+  ids.forEach(id=>{const r=calcMkt(id);if(r) resultados.push({id,...r})})
+  atualizarRanking(resultados)
+}
+
+function calcMkt(id){
+  if(!lastCalc) return null
+  const comissao = v('mktCom_'+id)
+  const extra    = v('mktExtra_'+id)
+  const desc     = v('mktDesc_'+id)
+  const margem   = v('margem')
+  const impostos = v('impostos')
+
+  // Margem de Venda + Margem Extra + Impostos + Comissão
+  const taxa=(margem+extra+impostos+comissao)/100
+
+  if(taxa>=1){
+    $('mktPreco_'+id).textContent='Inválido'
+    $('mktOriginal_'+id).textContent='—'
+    $('mktLucro_'+id).textContent='—'
+    $('mktMargem_'+id).textContent='—'
+    $('mktPerda_'+id).textContent='—'
+    $('mktAlerta_'+id).className='mp-alerta'
+    $('mktAlerta_'+id).textContent=''
+    return null
+  }
+
+  // Preço base SEM desconto
+  const precoOriginal=(lastCalc.custoTotal+lastCalc.freteV)/(1-taxa)
+
+  // Preço final COM desconto campanha
+  const precoFinal=precoOriginal*(1-desc/100)
+
+  // Lucro e margem com campanha
+  const valImp  = precoFinal*(impostos/100)
+  const valCom  = precoFinal*(comissao/100)
+  const lucro   = precoFinal-lastCalc.custoTotal-lastCalc.freteV-valImp-valCom
+  const mReal   = precoFinal>0?(lucro/precoFinal)*100:0
+
+  // Lucro SEM desconto (para calcular perda de margem)
+  const lucroOriginal = precoOriginal-lastCalc.custoTotal-lastCalc.freteV-precoOriginal*(impostos/100)-precoOriginal*(comissao/100)
+  const mRealOriginal = precoOriginal>0?(lucroOriginal/precoOriginal)*100:0
+  const perdaMargem   = mRealOriginal-mReal
+
+  // Exibir preço original riscado
+  $('mktOriginal_'+id).textContent = moeda(precoOriginal)
+
+  // Preço com campanha
+  $('mktPreco_'+id).textContent = desc>0 ? moeda(precoFinal) : moeda(precoOriginal)
+
+  // Perda de margem
+  const perdaEl=$('mktPerda_'+id)
+  if(desc>0){
+    perdaEl.textContent='▼ '+pct(perdaMargem)
+    perdaEl.className='cr-val '+(perdaMargem>5?'perda-bad':'perda-ok')
+  } else {
+    perdaEl.textContent='Sem desconto'
+    perdaEl.className='cr-val'
+    perdaEl.style.color='var(--muted)'
+  }
+
+  // Lucro
+  const lEl=$('mktLucro_'+id)
+  lEl.textContent=moeda(lucro)
+  lEl.className='val '+(lucro>=0?'green':'red')
+
+  // Badge
+  const badge=$('mktBadge_'+id)
+  if(badge){
+    badge.textContent  = lucro>=0?'✅ Lucrativo':'❌ Prejuízo'
+    badge.className    = 'badge-lucro '+(lucro>=0?'badge-ok':'badge-bad')
+    badge.style.display= 'inline-block'
+  }
+
+  // Margem real
+  $('mktMargem_'+id).textContent=pct(mReal)
+
+  // ALERTA automático
+  const alertaEl=$('mktAlerta_'+id)
+  if(lucro<0){
+    alertaEl.textContent='🚨 ATENÇÃO: Esta campanha gera PREJUÍZO. Revise o desconto ou margem.'
+    alertaEl.className='mp-alerta alerta-prejuizo'
+  } else if(mReal<5){
+    alertaEl.textContent='⚠️ Margem muito baixa (< 5%). Risco de prejuízo com variações de custo.'
+    alertaEl.className='mp-alerta alerta-atencao'
+  } else {
+    alertaEl.textContent='✅ Operação saudável. Margem dentro do esperado.'
+    alertaEl.className='mp-alerta alerta-ok'
+  }
+
+  return {preco:precoFinal,lucro,mReal}
+}
+
+function atualizarRanking(resultados){
+  if(!resultados.length){$('rankingList').innerHTML='<div class="empty"><div class="ei">📈</div><p>Calcule para ver o ranking</p></div>';return}
+  const nomes={ml1:'ML Linha 1',mag1:'Magalu Linha 1',ml2:'ML Linha 2',mag2:'Magalu Linha 2'}
+  const sorted=[...resultados].sort((a,b)=>b.lucro-a.lucro)
+  $('rankingList').innerHTML=sorted.map((r,i)=>{
+    const pos=i<3?['pos-1','pos-2','pos-3'][i]:'pos-rest'
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}°`
+    return `<div class="ranking-row">
+      <div class="pos ${pos}">${medal}</div>
+      <div class="rname">${nomes[r.id]||r.id}</div>
+      <div class="rpreco">${moeda(r.preco)}</div>
+      <div class="rlucro ${r.lucro>=0?'green':'red'}">${moeda(r.lucro)}</div>
+      <div class="rmargem">${pct(r.mReal)}</div>
+    </div>`
+  }).join('')
+}
+
+function salvarHistorico(){
+  if(!lastCalc){toast('⚠️ Calcule primeiro.');return}
+  const nome=$('nomeProduto').value.trim()||`Produto ${historico.length+1}`
+  historico.push({nome,...lastCalc,data:now()})
+  renderHistorico()
+  toast('💾 Simulação salva!')
+}
+
+function renderHistorico(){
+  if(!historico.length){$('histContent').innerHTML='<div class="hist-empty">Nenhuma simulação salva.</div>';return}
+  let html=`<div style="overflow-x:auto"><table class="hist-table"><thead><tr>
+    <th>#</th><th>Produto</th><th>Data</th><th>Custo Total</th><th>Preço Venda</th><th>Lucro</th><th>Margem Real</th><th></th>
+  </tr></thead><tbody>`
+  historico.forEach((h,i)=>{
+    html+=`<tr>
+      <td>${i+1}</td><td><strong>${h.nome}</strong></td>
+      <td style="color:var(--muted);font-size:12px">${h.data}</td>
+      <td>${moeda(h.custoTotal)}</td>
+      <td><strong>${moeda(h.preco)}</strong></td>
+      <td style="color:${h.lucro>=0?'var(--success)':'var(--danger)'}"><strong>${moeda(h.lucro)}</strong></td>
+      <td style="color:var(--warning)">${pct(h.margemReal)}</td>
+      <td><button class="btn btn-secondary" style="padding:6px 10px;font-size:11px;min-width:unset" onclick="removerHistorico(${i})">🗑️</button></td>
+    </tr>`
+  })
+  html+='</tbody></table></div>'
+  $('histContent').innerHTML=html
+}
+
+function removerHistorico(i){historico.splice(i,1);renderHistorico();toast('🗑️ Removido.')}
+function limparHistorico(){historico=[];renderHistorico();toast('🗑️ Histórico limpo.')}
+
+function copiarResultado(){
+  if(!lastCalc){toast('⚠️ Calcule primeiro.');return}
+  const nome=$('nomeProduto').value.trim()||'Produto'
+  const txt=`${nome}\nPreço de Venda: ${moeda(lastCalc.preco)}\nCusto Total: ${moeda(lastCalc.custoTotal)}\nLucro Líquido: ${moeda(lastCalc.lucro)}\nMargem Real: ${pct(lastCalc.margemReal)}`
+  navigator.clipboard.writeText(txt).then(()=>toast('📋 Copiado!')).catch(()=>toast('⚠️ Erro ao copiar.'))
+}
+
+function exportarPDF(){
+  if(!lastCalc){toast('⚠️ Calcule antes de exportar.');return}
+  html2pdf().set({margin:10,filename:'simulacao_preco_v33.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from($('pdf-area')).save()
+  toast('📄 Exportando PDF...')
+}
+
+function resetUI(){
+  $('precoVenda').textContent='R$ —';$('heroSub').textContent='Preencha os campos ao lado'
+  $('manualBadge').style.display='none'
+  $('sCusto').textContent='R$ —';$('sMargem').textContent='R$ —'
+  $('sLucro').textContent='R$ —';$('sLucro').className='svalue green'
+  $('sMargemReal').textContent='— %'
+  $('bkContent').innerHTML='<div class="empty"><div class="ei">🔢</div><p>Preencha os campos para ver o detalhamento</p></div>'
+  $('chartArea').innerHTML='<div class="empty"><div class="ei">📊</div><p>Preencha os campos para ver o gráfico</p></div>'
+  if(chartInstance){chartInstance.destroy();chartInstance=null}
+  lastCalc=null
+  $('custoGrid').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ei">🔢</div><p>Calcule no simulador</p></div>'
+  $('rankingList').innerHTML='<div class="empty"><div class="ei">📈</div><p>Calcule para ver o ranking</p></div>'
+  ;['ml1','mag1','ml2','mag2'].forEach(id=>{
+    $('mktPreco_'+id).textContent='—'
+    $('mktOriginal_'+id).textContent='—'
+    $('mktLucro_'+id).textContent='—'
+    $('mktMargem_'+id).textContent='—'
+    $('mktPerda_'+id).textContent='—'
+    $('mktAlerta_'+id).className='mp-alerta'
+    $('mktAlerta_'+id).textContent=''
+    const b=$('mktBadge_'+id);if(b) b.style.display='none'
+  })
+}
+
+function limpar(){
+  document.querySelectorAll('input[type="number"]').forEach(i=>{
+    if(!i.id.startsWith('mktCom_')&&!i.id.startsWith('mktExtra_')&&!i.id.startsWith('mktDesc_')&&i.id!=='cambio') i.value=''
+  })
+  $('nomeProduto').value=''
+  $('cambio').value='1'
+  ;['ml1','mag1','ml2','mag2'].forEach(id=>{
+    $('mktCom_'+id).value='18'
+    $('mktExtra_'+id).value='3'
+    $('mktDesc_'+id).value='0'
+  })
+  resetUI();atualizarHeaderProduto()
+  toast('🗑️ Campos limpos.')
+}
+
+$('nomeProduto').addEventListener('input',atualizarHeaderProduto)
+</script>
+</body>
+</html>'''
+
+open(file_path,'w',encoding='utf-8').write(html)
+print(file_path)
