@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulador de Preço PRO 3.3</title>
+<title>Simulador de Preço PRO 3.6</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
@@ -64,7 +64,7 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);padding:24px;c
 .hero small{display:block;text-transform:uppercase;letter-spacing:1.2px;font-size:11px;font-weight:800;color:rgba(255,255,255,.65);margin-bottom:6px}
 .hero .price{font-size:38px;font-weight:900;color:#fff;line-height:1;margin-bottom:4px;position:relative;z-index:1}
 .hero .sub{font-size:12px;color:rgba(255,255,255,.6)}
-.manual-badge{display:none;background:#f59e0b;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;margin-top:6px}
+.manual-badge{background:#f59e0b;color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;margin-top:8px;display:inline-block}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,.03)}
 .stat .slabel{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:4px}
@@ -96,11 +96,16 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);padding:24px;c
 .ci-indigo{background:#eef2ff;color:#4338ca;border:1px solid #c7d2fe}
 .ci-violet{background:#f5f3ff;color:#6d28d9;border:1px solid #ddd6fe}
 .ci-amber{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.ci-teal{background:#f0fdfa;color:#0f766e;border:1px solid #99f6e4}
 .ci-fixa{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
 .custo-item-total{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border:none;grid-column:1/-1;display:flex;flex-direction:row;align-items:center;justify-content:space-between;padding:16px 24px}
 .custo-item-total .ci-label{font-size:13px;opacity:.9;margin-bottom:0}
 .custo-item-total .ci-valor{font-size:22px;margin:0 10px;flex:1;text-align:right}
 .custo-item-total .ci-pct{font-size:14px;opacity:.9;margin-top:0}
+.fretevenda-bloco{background:#fffbeb;border:1.5px dashed #fcd34d;border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.fretevenda-bloco .fv-label{font-size:12px;font-weight:700;color:#92400e;display:flex;align-items:center;gap:6px}
+.fretevenda-bloco .fv-valor{font-size:16px;font-weight:900;color:#b45309}
+.fretevenda-nota{font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;text-align:right}
 .ranking-bloco{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:18px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
 .ranking-title{font-size:13px;font-weight:800;color:var(--primary);margin-bottom:14px;display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.5px}
 .ranking-title::after{content:"";flex:1;height:1px;background:var(--border)}
@@ -155,481 +160,419 @@ body{font-family:"Segoe UI",Arial,sans-serif;background:var(--bg);padding:24px;c
 <div class="container">
 
 <div class="topbar">
-<div class="vtag">🚀 Versão 3.3 PRO - CORRIGIDA</div>
-<h1>Simulador de Preço de Venda PRO 3.3</h1>
-<p>✅ Sincronização SEMPRE automática · Frete sobre Custo Convertido · Taxa Fixa · Ranking · Alertas</p>
+  <div class="vtag">🚀 Versão 3.6 PRO</div>
+  <h1>Simulador de Preço de Venda PRO 3.6</h1>
+  <p>✅ Frete Venda separado · % Frete Compra sobre Custo Produto · Preço Manual · Sincronização Automática · Histórico Corrigido</p>
 </div>
 
 <div class="tabs">
-<div class="tab active" onclick="mudarAba('simulador',this)">🧮 Simulador</div>
-<div class="tab" onclick="mudarAba('marketplaces',this)">🛒 Marketplaces</div>
-<div class="tab" onclick="mudarAba('historico',this)">📋 Histórico</div>
+  <div class="tab active" onclick="mudarAba('simulador',this)">🧮 Simulador</div>
+  <div class="tab" onclick="mudarAba('marketplaces',this)">🛒 Marketplaces</div>
+  <div class="tab" onclick="mudarAba('historico',this)">📋 Histórico</div>
 </div>
 
-<!-- SIMULADOR -->
+<!-- ======== SIMULADOR ======== -->
 <div class="panel active" id="panel-simulador">
-<div class="sim-layout">
+  <div class="sim-layout">
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">📦</div>
+        <div><h2>Parâmetros de Precificação</h2><p>⚡ Sincronização automática para todos marketplaces</p></div>
+      </div>
+      <div class="card-body">
 
-<div class="card">
-<div class="card-header">
-<div class="icon">📦</div>
-<div><h2>Parâmetros de Precificação</h2><p>⚡ Sincronização automática para todos marketplaces</p></div>
-</div>
-<div class="card-body">
+        <div class="stitle">📝 Identificação</div>
+        <div class="field">
+          <label>Nome do Produto</label>
+          <div class="iw"><input type="text" id="nomeProduto" placeholder="Ex: Smartphone Samsung Galaxy" oninput="calcularAll()"></div>
+        </div>
 
-<div class="stitle">📝 Identificação</div>
-<div class="field">
-<label>Nome do Produto</label>
-<div class="iw"><input type="text" id="nomeProduto" placeholder="Ex: Smartphone Samsung Galaxy" oninput="calcularAll()"></div>
-</div>
+        <div class="stitle">🛒 Custos de Compra</div>
+        <div class="grid2">
+          <div class="field"><label>Custo de Compra</label><div class="iw"><input type="number" id="custo" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div></div>
+          <div class="field"><label>Taxa de Câmbio</label><div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1" placeholder="1.0000" min="0" step="0.0001" oninput="calcularAll()"></div></div>
+          <div class="field"><label>Frete de Compra (%)</label><div class="iw ws"><input type="number" id="freteCompra" value="28" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+          <div class="field"><label>Outras Despesas (R$)</label><div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div></div>
+          <div class="field"><label>Outras Despesas (%)</label><div class="iw ws"><input type="number" id="outrasPct" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+        </div>
 
-<div class="stitle">🛒 Custos de Compra</div>
-<div class="grid2">
-<div class="field">
-<label>Custo de Compra</label>
-<div class="iw"><input type="number" id="custo" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div>
-</div>
-<div class="field">
-<label>Taxa de Câmbio</label>
-<div class="iw wp"><span class="pre">×</span><input type="number" id="cambio" value="1" placeholder="1.0000" min="0" step="0.0001" oninput="calcularAll()"></div>
-</div>
-<div class="field">
-<label>Frete de Compra (%)</label>
-<div class="iw ws"><input type="number" id="freteCompra" value="28" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
-</div>
-<div class="field">
-<label>Outras Despesas (R$)</label>
-<div class="iw wp"><span class="pre">R$</span><input type="number" id="outrasReais" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div>
-</div>
-<div class="field">
-<label>Outras Despesas (%)</label>
-<div class="iw ws"><input type="number" id="outrasPct" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
-</div>
-</div>
+        <div class="stitle">💰 Venda & Tributação</div>
+        <div class="grid2">
+          <div class="field"><label>Margem de Venda (%)</label><div class="iw ws"><input type="number" id="margem" value="20" placeholder="0.00" min="0" max="99" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+          <div class="field"><label>Impostos (%)</label><div class="iw ws"><input type="number" id="impostos" value="2" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+          <div class="field"><label>Frete de Venda (R$)</label><div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div></div>
+          <div class="field"><label>Comissão Plataforma (%)</label><div class="iw ws"><input type="number" id="comissao" value="18" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div></div>
+          <div class="field"><label>Preço de Venda (Manual)</label><div class="iw wp"><span class="pre">R$</span><input type="number" id="precoManual" placeholder="Opcional" min="0" step="0.01" oninput="calcularAll()"></div></div>
+        </div>
 
-<div class="stitle">💰 Venda & Tributação</div>
-<div class="grid2">
-<div class="field">
-<label>Margem de Venda (%)</label>
-<div class="iw ws"><input type="number" id="margem" value="20" placeholder="0.00" min="0" max="99" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
-</div>
-<div class="field">
-<label>Impostos (%)</label>
-<div class="iw ws"><input type="number" id="impostos" value="2" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
-</div>
-<div class="field">
-<label>Frete de Venda (R$)</label>
-<div class="iw wp"><span class="pre">R$</span><input type="number" id="freteVenda" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"></div>
-</div>
-<div class="field">
-<label>Comissão Plataforma (%)</label>
-<div class="iw ws"><input type="number" id="comissao" value="18" placeholder="0.00" min="0" step="0.01" oninput="calcularAll()"><span class="suf">%</span></div>
-</div>
-</div>
+        <div class="actions">
+          <button class="btn btn-primary" onclick="calcularAll()">⚡ Calcular Tudo</button>
+          <button class="btn btn-success" onclick="salvarHistorico()">💾 Salvar</button>
+          <button class="btn btn-accent" onclick="copiarResultado()">📋 Copiar</button>
+          <button class="btn btn-secondary" onclick="exportarPDF()">📄 PDF</button>
+          <button class="btn btn-secondary" onclick="limpar()">🗑️ Limpar</button>
+        </div>
+      </div>
+    </div>
 
-<div class="actions">
-<button class="btn btn-primary" onclick="calcularAll()">⚡ Calcular Tudo</button>
-<button class="btn btn-success" onclick="salvarHistorico()">💾 Salvar</button>
-<button class="btn btn-accent" onclick="copiarResultado()">📋 Copiar</button>
-<button class="btn btn-secondary" onclick="exportarPDF()">📄 PDF</button>
-<button class="btn btn-secondary" onclick="limpar()">🗑️ Limpar</button>
-</div>
-</div>
-</div>
+    <div class="results" id="pdf-area">
+      <div class="hero">
+        <small>💵 Preço de Venda</small>
+        <div class="price" id="precoVenda">R$ —</div>
+        <div class="sub" id="heroSub">Preencha os campos ao lado</div>
+        <div class="manual-badge" id="manualBadge" style="display:none">✍️ PREÇO MANUAL ATIVO</div>
+      </div>
 
-<div class="results" id="pdf-area">
-<div class="hero">
-<small>💵 Preço de Venda Sugerido</small>
-<div class="price" id="precoVenda">R$ —</div>
-<div class="sub" id="heroSub">Preencha os campos ao lado</div>
+      <div class="stats">
+        <div class="stat"><div class="sicon">📦</div><div class="slabel">Custo Final do Produto</div><div class="svalue blue" id="sCusto">R$ —</div></div>
+        <div class="stat"><div class="sicon">📈</div><div class="slabel">Valor da Margem</div><div class="svalue green" id="sMargem">R$ —</div></div>
+        <div class="stat"><div class="sicon">💸</div><div class="slabel">Lucro Líquido</div><div class="svalue green" id="sLucro">R$ —</div></div>
+        <div class="stat"><div class="sicon">📊</div><div class="slabel">Margem Real</div><div class="svalue orange" id="sMargemReal">— %</div></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="ch">🥧 Composição do Preço</div>
+        <div class="cb" id="chartArea"><div class="empty"><div class="ei">📊</div><p>Preencha os campos para ver o gráfico</p></div></div>
+      </div>
+
+      <div class="breakdown">
+        <div class="bk-header">📋 Detalhamento Completo</div>
+        <div id="bkContent"><div class="empty"><div class="ei">🔢</div><p>Preencha os campos para ver o detalhamento</p></div></div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div class="stats">
-<div class="stat"><div class="sicon">📦</div><div class="slabel">Custo Total</div><div class="svalue blue" id="sCusto">R$ —</div></div>
-<div class="stat"><div class="sicon">📈</div><div class="slabel">Valor da Margem</div><div class="svalue green" id="sMargem">R$ —</div></div>
-<div class="stat"><div class="sicon">💸</div><div class="slabel">Lucro Líquido</div><div class="svalue green" id="sLucro">R$ —</div></div>
-<div class="stat"><div class="sicon">📊</div><div class="slabel">Margem Real</div><div class="svalue orange" id="sMargemReal">— %</div></div>
-</div>
-
-<div class="chart-card">
-<div class="ch">🥧 Composição do Preço</div>
-<div class="cb" id="chartArea">
-<div class="empty"><div class="ei">📊</div><p>Preencha os campos para ver o gráfico</p></div>
-</div>
-</div>
-
-<div class="breakdown">
-<div class="bk-header">📋 Detalhamento Completo</div>
-<div id="bkContent">
-<div class="empty"><div class="ei">🔢</div><p>Preencha os campos para ver o detalhamento</p></div>
-</div>
-</div>
-
-</div>
-
-</div>
-</div>
-
-<!-- MARKETPLACES -->
+<!-- ======== MARKETPLACES ======== -->
 <div class="panel" id="panel-marketplaces">
-<div class="card">
-<div class="card-header">
-<div class="icon">🛒</div>
-<div><h2>Simulação por Marketplace</h2><p>✅ Sincronização automática · Preço Original vs Campanha · Alerta de Prejuízo · Ranking</p></div>
-</div>
-<div class="card-body">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🛒</div>
+      <div><h2>Simulação por Marketplace</h2><p>✅ Frete Venda separado · % Frete Compra sobre Custo Produto · Sincronização Automática · Ranking · Alertas</p></div>
+    </div>
+    <div class="card-body">
 
-<div id="mpProductHeader" class="mp-product-header empty-header">📦 Digite o nome do produto no Simulador</div>
+      <div id="mpProductHeader" class="mp-product-header empty-header">📦 Digite o nome do produto no Simulador</div>
 
-<div class="custo-bloco">
-<div class="custo-bloco-title">📊 Composição do Custo Final do Produto</div>
-<div id="custoGrid" class="custo-grid">
-<div class="empty" style="grid-column:1/-1"><div class="ei">🔢</div><p>Calcule no simulador para ver os custos</p></div>
-</div>
+      <!-- BLOCO CUSTO COM FRETE VENDA SEPARADO -->
+      <div class="custo-bloco">
+        <div class="custo-bloco-title">📊 Composição do Custo Final do Produto</div>
+        <div id="custoGrid" class="custo-grid">
+          <div class="empty" style="grid-column:1/-1"><div class="ei">🔢</div><p>Calcule no simulador para ver os custos</p></div>
+        </div>
+        <!-- Frete Venda separado aqui -->
+        <div id="freteVendaBloco" style="display:none">
+          <div class="fretevenda-bloco">
+            <span class="fv-label">🚛 Frete de Venda <span style="font-size:10px;opacity:.7">(separado do custo do produto)</span></span>
+            <span class="fv-valor" id="freteVendaValorMkt">—</span>
+          </div>
+          <div class="fretevenda-nota">⚠️ O Frete de Venda é adicionado ao custo base para cálculo do preço em cada marketplace, mas não compõe o Custo Final do Produto.</div>
+        </div>
+      </div>
+
+      <div class="ranking-bloco">
+        <div class="ranking-title">🏆 Ranking de Lucratividade por Marketplace</div>
+        <div id="rankingList" class="ranking-list">
+          <div class="empty"><div class="ei">📈</div><p>Calcule no simulador para ver o ranking</p></div>
+        </div>
+      </div>
+
+      <div style="margin:20px 0 10px"><div class="stitle">Linha 1 — Simulação Principal</div></div>
+      <div class="mp-grid">
+        <div class="mp-col">
+          <div class="mp-head" style="background:#ffe600;color:#333">🛒 Mercado Livre</div>
+          <div class="mp-body">
+            <div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_ml1" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_ml1" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_ml1" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_ml1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_ml1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-compare-box">
+              <div class="cb-title">📊 Original vs Campanha</div>
+              <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_ml1">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_ml1">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_ml1">—</span></div>
+            </div>
+            <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_ml1">—</div><div id="mktBadge_ml1" class="badge-lucro" style="display:none"></div></div>
+            <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_ml1">—</div></div>
+            <div class="mp-alerta" id="mktAlerta_ml1"></div>
+          </div>
+        </div>
+
+        <div class="mp-col">
+          <div class="mp-head" style="background:#0086ff;color:#fff">🛍️ Magalu</div>
+          <div class="mp-body">
+            <div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_mag1" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_mag1" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_mag1" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_mag1" value="5" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_mag1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-compare-box">
+              <div class="cb-title">📊 Original vs Campanha</div>
+              <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_mag1">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_mag1">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_mag1">—</span></div>
+            </div>
+            <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_mag1">—</div><div id="mktBadge_mag1" class="badge-lucro" style="display:none"></div></div>
+            <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_mag1">—</div></div>
+            <div class="mp-alerta" id="mktAlerta_mag1"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin:20px 0 10px"><div class="stitle">Linha 2 — Simulação Alternativa</div></div>
+      <div class="mp-grid">
+        <div class="mp-col">
+          <div class="mp-head" style="background:#ffe600;color:#333">🛒 Mercado Livre</div>
+          <div class="mp-body">
+            <div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_ml2" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_ml2" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_ml2" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_ml2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_ml2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-compare-box">
+              <div class="cb-title">📊 Original vs Campanha</div>
+              <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_ml2">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_ml2">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_ml2">—</span></div>
+            </div>
+            <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_ml2">—</div><div id="mktBadge_ml2" class="badge-lucro" style="display:none"></div></div>
+            <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_ml2">—</div></div>
+            <div class="mp-alerta" id="mktAlerta_ml2"></div>
+          </div>
+        </div>
+
+        <div class="mp-col">
+          <div class="mp-head" style="background:#0086ff;color:#fff">🛍️ Magalu</div>
+          <div class="mp-body">
+            <div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_mag2" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_mag2" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_mag2" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_mag2" value="5" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_mag2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
+            <div class="mp-compare-box">
+              <div class="cb-title">📊 Original vs Campanha</div>
+              <div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_mag2">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_mag2">—</span></div>
+              <div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_mag2">—</span></div>
+            </div>
+            <div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_mag2">—</div><div id="mktBadge_mag2" class="badge-lucro" style="display:none"></div></div>
+            <div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_mag2">—</div></div>
+            <div class="mp-alerta" id="mktAlerta_mag2"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
-<div class="ranking-bloco">
-<div class="ranking-title">🏆 Ranking de Lucratividade por Marketplace</div>
-<div id="rankingList" class="ranking-list">
-<div class="empty"><div class="ei">📈</div><p>Calcule no simulador para ver o ranking</p></div>
-</div>
-</div>
-
-<div style="margin:20px 0 10px"><div class="stitle">Linha 1 — Simulação Principal</div></div>
-<div class="mp-grid">
-
-<div class="mp-col">
-<div class="mp-head" style="background:#ffe600;color:#333">🛒 Mercado Livre</div>
-<div class="mp-body">
-<div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_ml1" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_ml1" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_ml1" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_ml1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_ml1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-compare-box">
-<div class="cb-title">📊 Original vs Campanha</div>
-<div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_ml1">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_ml1">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_ml1">—</span></div>
-</div>
-<div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_ml1">—</div><div id="mktBadge_ml1" class="badge-lucro" style="display:none"></div></div>
-<div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_ml1">—</div></div>
-<div class="mp-alerta" id="mktAlerta_ml1"></div>
-</div>
-</div>
-
-<div class="mp-col">
-<div class="mp-head" style="background:#0086ff;color:#fff">🛍️ Magalu</div>
-<div class="mp-body">
-<div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_mag1" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_mag1" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_mag1" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_mag1" value="5" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_mag1" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-compare-box">
-<div class="cb-title">📊 Original vs Campanha</div>
-<div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_mag1">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_mag1">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_mag1">—</span></div>
-</div>
-<div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_mag1">—</div><div id="mktBadge_mag1" class="badge-lucro" style="display:none"></div></div>
-<div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_mag1">—</div></div>
-<div class="mp-alerta" id="mktAlerta_mag1"></div>
-</div>
-</div>
-
-</div>
-
-<div style="margin:20px 0 10px"><div class="stitle">Linha 2 — Simulação Alternativa</div></div>
-<div class="mp-grid">
-
-<div class="mp-col">
-<div class="mp-head" style="background:#ffe600;color:#333">🛒 Mercado Livre</div>
-<div class="mp-body">
-<div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_ml2" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_ml2" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_ml2" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_ml2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_ml2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-compare-box">
-<div class="cb-title">📊 Original vs Campanha</div>
-<div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_ml2">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_ml2">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_ml2">—</span></div>
-</div>
-<div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_ml2">—</div><div id="mktBadge_ml2" class="badge-lucro" style="display:none"></div></div>
-<div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_ml2">—</div></div>
-<div class="mp-alerta" id="mktAlerta_ml2"></div>
-</div>
-</div>
-
-<div class="mp-col">
-<div class="mp-head" style="background:#0086ff;color:#fff">🛍️ Magalu</div>
-<div class="mp-body">
-<div class="mp-input-group"><label>Margem de Venda (%)</label><input type="number" id="mktMargem_mag2" value="20" min="0" max="99" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Margem Extra (%)</label><input type="number" id="mktExtra_mag2" value="3" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Comissão (%)</label><input type="number" id="mktCom_mag2" value="18" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Taxa Fixa (R$)</label><input type="number" id="mktFixa_mag2" value="5" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-input-group"><label>Desconto Campanha (%)</label><input type="number" id="mktDesc_mag2" value="0" min="0" step="0.01" oninput="calcularMarketplaces()"></div>
-<div class="mp-compare-box">
-<div class="cb-title">📊 Original vs Campanha</div>
-<div class="mp-compare-row"><span class="cr-label">Preço Original</span><span class="cr-val original" id="mktOriginal_mag2">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Preço com Desconto</span><span class="cr-val campanha" id="mktPreco_mag2">—</span></div>
-<div class="mp-compare-row"><span class="cr-label">Perda de Margem</span><span class="cr-val" id="mktPerda_mag2">—</span></div>
-</div>
-<div class="mp-result-box"><div class="label">Lucro com Campanha</div><div class="val" id="mktLucro_mag2">—</div><div id="mktBadge_mag2" class="badge-lucro" style="display:none"></div></div>
-<div class="mp-result-box"><div class="label">Margem Real</div><div class="val orange" id="mktMargemReal_mag2">—</div></div>
-<div class="mp-alerta" id="mktAlerta_mag2"></div>
-</div>
-</div>
-
-</div>
-</div>
-</div>
-
-<!-- HISTÓRICO -->
+<!-- ======== HISTÓRICO ======== -->
 <div class="panel" id="panel-historico">
-<div class="card">
-<div class="card-header">
-<div class="icon">📋</div>
-<div><h2>Histórico de Simulações</h2><p>Simulações salvas nesta sessão</p></div>
-</div>
-<div class="card-body">
-<div style="display:flex;justify-content:flex-end;margin-bottom:12px">
-<button class="btn btn-secondary" style="max-width:180px" onclick="limparHistorico()">🗑️ Limpar Histórico</button>
-</div>
-<div id="histContent">
-<div class="hist-empty">Nenhuma simulação salva ainda.</div>
-</div>
-</div>
-</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">📋</div>
+      <div><h2>Histórico de Simulações</h2><p>Simulações salvas nesta sessão</p></div>
+    </div>
+    <div class="card-body">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+        <button class="btn btn-secondary" style="max-width:180px" onclick="limparHistorico()">🗑️ Limpar Histórico</button>
+      </div>
+      <div id="histContent"><div class="hist-empty">Nenhuma simulação salva ainda.</div></div>
+    </div>
+  </div>
 </div>
 
-</div>
+</div><!-- /container -->
 <div class="toast" id="toast"></div>
 
 <script>
-
-const $ = id => document.getElementById(id)
-const v = id => { const x = parseFloat($(id).value); return isNaN(x) ? 0 : x }
+const $  = id => document.getElementById(id)
+const v  = id => { const el=$(id); if(!el) return 0; const x=parseFloat(el.value); return isNaN(x)?0:x }
 const moeda = n => Number(n).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})
-const pct = n => Number(n).toFixed(2).replace('.',',') + '%'
-const now = () => new Date().toLocaleString('pt-BR')
+const pct   = n => Number(n).toFixed(2).replace('.',',')+'%'
+const now   = () => new Date().toLocaleString('pt-BR')
 
 let chartInstance = null
-let historico = []
-let lastCalc = null
+let historico     = []
+let lastCalc      = null
 
+/* ── TOAST ── */
 function toast(msg, dur=2800){
-  const t = $('toast')
-  t.textContent = msg
-  t.classList.add('show')
-  setTimeout(() => t.classList.remove('show'), dur)
+  const t=$('toast'); t.textContent=msg; t.classList.add('show')
+  setTimeout(()=>t.classList.remove('show'),dur)
 }
 
-function mudarAba(aba, el){
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'))
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'))
+/* ── ABAS ── */
+function mudarAba(aba,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'))
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
   el.classList.add('active')
   $('panel-'+aba).classList.add('active')
 }
 
-/* =====================================================
-🔄 SINCRONIZAÇÃO SEMPRE ATIVA - NUNCA TRAVA
-============================================================ */
-
+/* ── SYNC SEMPRE AUTOMÁTICO ── */
 function syncMargensMarketplaces(){
-  // SYNC SEMPRE - incondicional
-  const m = v('margem')
-  ;['ml1','mag1','ml2','mag2'].forEach(id => {
-    $('mktMargem_'+id).value = m.toString()
-  })
+  const m=v('margem')
+  ;['ml1','mag1','ml2','mag2'].forEach(id=>{ $('mktMargem_'+id).value=m.toString() })
 }
-
 function syncComissoesMarketplaces(){
-  // SYNC SEMPRE - incondicional  
-  const c = v('comissao')
-  ;['ml1','mag1','ml2','mag2'].forEach(id => {
-    $('mktCom_'+id).value = c.toString()
-  })
+  const c=v('comissao')
+  ;['ml1','mag1','ml2','mag2'].forEach(id=>{ $('mktCom_'+id).value=c.toString() })
 }
 
+/* ── CALCULAR TUDO ── */
 function calcularAll(){
-  // 1️⃣ PRIMEIRO sincroniza sempre
   syncMargensMarketplaces()
   syncComissoesMarketplaces()
-  
-  // 2️⃣ DEPOIS calcula
   calcular()
   calcularMarketplaces()
   atualizarHeaderProduto()
 }
 
+/* ── CÁLCULO PRINCIPAL ── */
 function calcular(){
-  const custo      = v('custo')
-  const cambio     = v('cambio') || 1
-  const freteCPct  = v('freteCompra')
-  const outrasRS   = v('outrasReais')
-  const outrasPct  = v('outrasPct')
-  const margem     = v('margem')
-  const impostos   = v('impostos')
-  const freteV     = v('freteVenda')
-  const comissao   = v('comissao')
+  const custo       = v('custo')
+  const cambio      = v('cambio') || 1
+  const freteCPct   = v('freteCompra')
+  const outrasRS    = v('outrasReais')
+  const outrasPct   = v('outrasPct')
+  const margem      = v('margem')
+  const impostos    = v('impostos')
+  const freteV      = v('freteVenda')
+  const comissao    = v('comissao')
+  const precoManual = v('precoManual')
 
-  if(custo === 0 && freteV === 0 && outrasRS === 0){ 
-    resetUI() 
-    return 
-  }
+  if(custo===0 && freteV===0 && outrasRS===0 && precoManual===0){ resetUI(); return }
 
-  /* 🚚 FRETE COMPRA SOBRE CUSTO CONVERTIDO - CORRETO */
+  /* ── custos ── */
   const custoBRL       = custo * cambio
-  const freteCompraVal = custoBRL * (freteCPct / 100)  // ← CORRIGIDO
+  const freteCompraVal = custoBRL * (freteCPct / 100)   // sobre custo convertido
   const base           = custoBRL + freteCompraVal + outrasRS
   const outrasVal      = base * (outrasPct / 100)
-  const custoTotal     = base + outrasVal
+  const custoProduto   = base + outrasVal                // SEM frete venda
+  const custoTotal     = custoProduto + freteV           // COM frete venda (para cálculo do preço)
 
   const taxa = (margem + impostos + comissao) / 100
-  if(taxa >= 1){ 
-    $('precoVenda').textContent = 'Inválido' 
-    return 
-  }
+  if(taxa >= 1 && precoManual <= 0){ $('precoVenda').textContent='Inválido'; return }
 
-  const preco = (custoTotal + freteV) / (1 - taxa)
+  const precoCalculado = taxa < 1 ? (custoProduto + freteV) / (1 - taxa) : 0
+  const preco          = precoManual > 0 ? precoManual : precoCalculado
 
-  const valMargem   = preco * (margem / 100)
-  const valImp      = preco * (impostos / 100)
-  const valComissao = preco * (comissao / 100)
-  const lucro       = preco - custoTotal - freteV - valImp - valComissao
+  const valImp      = preco * (impostos  / 100)
+  const valComissao = preco * (comissao  / 100)
+  const lucro       = preco - custoTotal - valImp - valComissao
+  const valMargem   = preco * (margem    / 100)
   const margemReal  = preco > 0 ? (lucro / preco) * 100 : 0
 
   lastCalc = {
     custo, custoBRL, freteCompraVal, outrasRS, outrasVal,
-    custoTotal, freteV, valImp, valComissao, valMargem,
-    preco, lucro, margemReal, margem, impostos, comissao,
+    custoProduto,   // sem frete venda — usado nos Marketplaces
+    custoTotal,     // com frete venda — usado no Simulador
+    freteV, valImp, valComissao, valMargem,
+    preco, precoCalculado, precoManual,
+    lucro, margemReal, margem, impostos, comissao,
     freteCPct, outrasPct, cambio
   }
 
+  /* ── UI Simulador ── */
   $('precoVenda').textContent = moeda(preco)
-  $('heroSub').textContent = `Custo total: ${moeda(custoTotal)} · Margem: ${pct(margem)}`
+  if(precoManual > 0){
+    $('heroSub').textContent   = `Preço manual ativo · Custo final: ${moeda(custoTotal)}`
+    $('manualBadge').style.display = 'inline-block'
+  } else {
+    $('heroSub').textContent   = `Custo final: ${moeda(custoTotal)} · Margem alvo: ${pct(margem)}`
+    $('manualBadge').style.display = 'none'
+  }
+
   $('sCusto').textContent = moeda(custoTotal)
   $('sMargem').textContent = moeda(valMargem)
-
-  const lEl = $('sLucro')
-  lEl.textContent = moeda(lucro)
-  lEl.className = 'svalue ' + (lucro >= 0 ? 'green' : 'red')
+  const lEl=$('sLucro'); lEl.textContent=moeda(lucro); lEl.className='svalue '+(lucro>=0?'green':'red')
   $('sMargemReal').textContent = pct(margemReal)
 
-  /* Detalhamento */
-  const rows = [
+  /* ── Detalhamento ── */
+  const rows=[
     {dot:'#0ea5e9', label:'Custo Produto (BRL)', val:custoBRL},
     {dot:'#6366f1', label:`Frete Compra (${pct(freteCPct)})`, val:freteCompraVal},
     {dot:'#8b5cf6', label:'Outras Despesas R$', val:outrasRS},
-    {dot:'#a78bfa', label:`Outras Despesas %`, val:outrasVal},
+    {dot:'#a78bfa', label:'Outras Despesas %', val:outrasVal},
     {dot:'#f59e0b', label:'Frete Venda', val:freteV},
     {dot:'#ef4444', label:`Impostos (${pct(impostos)})`, val:valImp},
     {dot:'#f97316', label:`Comissão (${pct(comissao)})`, val:valComissao},
-    {dot:'#10b981', label:`Margem (${pct(margem)})`, val:valMargem}
-  ].filter(r => r.val > 0)
+    {dot:'#10b981', label: precoManual>0 ? 'Lucro/Margem Real' : `Margem (${pct(margem)})`, val:lucro}
+  ].filter(r=>r.val>0)
 
-  let bk = rows.map(r => 
-    `<div class="bk-row">
-      <span class="rl"><span class="dot" style="background:${r.dot}"></span>${r.label}</span>
-      <span class="rv">${moeda(r.val)}</span>
-    </div>`
-  ).join('')
-
-  bk += `<div class="bk-row bk-total">
-    <span class="rl">💰 Preço de Venda Final</span>
-    <span class="rv">${moeda(preco)}</span>
-  </div>`
-
+  let bk = rows.map(r=>`<div class="bk-row"><span class="rl"><span class="dot" style="background:${r.dot}"></span>${r.label}</span><span class="rv">${moeda(r.val)}</span></div>`).join('')
+  bk += `<div class="bk-row bk-total"><span class="rl">💰 Preço de Venda ${precoManual>0?'Manual':'Final'}</span><span class="rv">${moeda(preco)}</span></div>`
   $('bkContent').innerHTML = bk
 
   renderChart(
     ['Custo','Frete Compra','Outras','Frete Venda','Impostos','Comissão','Lucro'],
-    [custoBRL, freteCompraVal, outrasRS+outrasVal, freteV, valImp, valComissao, Math.max(lucro, 0)],
+    [custoBRL, freteCompraVal, outrasRS+outrasVal, freteV, valImp, valComissao, Math.max(lucro,0)],
     ['#0ea5e9','#6366f1','#8b5cf6','#f59e0b','#ef4444','#f97316','#10b981']
   )
 
   atualizarBlocoCustos()
 }
 
+/* ── BLOCO DE CUSTOS (Marketplaces) ── */
+/* Exibe custoProduto (SEM freteV) + freteV separado */
 function atualizarBlocoCustos(){
   if(!lastCalc) return
-  const c = lastCalc, total = c.custoTotal
+  const c = lastCalc
+
+  /* percentual do frete compra sobre custoProduto */
+  const pctFreteC = c.custoProduto > 0 ? (c.freteCompraVal / c.custoProduto) * 100 : 0
+
+  const total = c.custoProduto   // ← SEM frete venda
   const itens = []
 
-  if(c.custoBRL > 0)
-    itens.push({label:c.cambio!==1?'Custo Convertido':'Custo Original', text:moeda(c.custoBRL), pct:pct((c.custoBRL/total)*100), cls:'ci-blue', icon:'📦'})
-  if(c.freteCompraVal > 0)
-    itens.push({label:'Frete Compra', text:moeda(c.freteCompraVal), pct:pct((c.freteCompraVal/total)*100), cls:'ci-indigo', icon:'🚚'})
-  if(c.outrasRS > 0)
-    itens.push({label:'Outras Desp R$', text:moeda(c.outrasRS), pct:pct((c.outrasRS/total)*100), cls:'ci-violet', icon:'📋'})
-  if(c.outrasVal > 0)
-    itens.push({label:'Outras Desp %', text:moeda(c.outrasVal), pct:pct((c.outrasVal/total)*100), cls:'ci-violet', icon:'📋'})
-  if(c.freteV > 0)
-    itens.push({label:'Frete Venda', text:moeda(c.freteV), pct:pct((c.freteV/total)*100), cls:'ci-amber', icon:'🚛'})
+  if(c.custoBRL>0)        itens.push({label:c.cambio!==1?'Custo Convertido':'Custo Original', text:moeda(c.custoBRL),        pct:pct((c.custoBRL/total)*100),        cls:'ci-blue',   icon:'📦'})
+  if(c.freteCompraVal>0)  itens.push({label:`Frete Compra (${pct(pctFreteC)})`,                text:moeda(c.freteCompraVal),  pct:pct((c.freteCompraVal/total)*100),  cls:'ci-indigo', icon:'🚚'})
+  if(c.outrasRS>0)        itens.push({label:'Outras Desp R$',                                  text:moeda(c.outrasRS),        pct:pct((c.outrasRS/total)*100),        cls:'ci-violet', icon:'📋'})
+  if(c.outrasVal>0)       itens.push({label:'Outras Desp %',                                   text:moeda(c.outrasVal),       pct:pct((c.outrasVal/total)*100),       cls:'ci-violet', icon:'📋'})
 
-  let html = itens.map(i => 
-    `<div class="custo-item ${i.cls}">
-      <div class="ci-label">${i.icon} ${i.label}</div>
-      <div class="ci-valor">${i.text}</div>
-      <div class="ci-pct">${i.pct}</div>
-    </div>`
-  ).join('')
-
-  html += `<div class="custo-item custo-item-total">
-    <div class="ci-label">🏁 CUSTO FINAL DO PRODUTO</div>
-    <div class="ci-valor">${moeda(total)}</div>
-    <div class="ci-pct">100%</div>
-  </div>`
-
+  let html = itens.map(i=>`<div class="custo-item ${i.cls}"><div class="ci-label">${i.icon} ${i.label}</div><div class="ci-valor">${i.text}</div><div class="ci-pct">${i.pct}</div></div>`).join('')
+  html += `<div class="custo-item custo-item-total"><div class="ci-label">🏁 CUSTO FINAL DO PRODUTO</div><div class="ci-valor">${moeda(total)}</div><div class="ci-pct">100%</div></div>`
   $('custoGrid').innerHTML = html
+
+  /* Frete Venda separado */
+  if(c.freteV > 0){
+    $('freteVendaBloco').style.display = 'block'
+    $('freteVendaValorMkt').textContent = moeda(c.freteV)
+  } else {
+    $('freteVendaBloco').style.display = 'none'
+  }
 }
 
+/* ── HEADER PRODUTO ── */
 function atualizarHeaderProduto(){
-  const nome = $('nomeProduto').value.trim()
-  const h = $('mpProductHeader')
-  h.textContent = nome ? '📦 ' + nome.toUpperCase() : '📦 Digite o nome do produto no Simulador'
-  h.className = nome ? 'mp-product-header' : 'mp-product-header empty-header'
+  const nome=$('nomeProduto').value.trim()
+  const h=$('mpProductHeader')
+  h.textContent = nome ? '📦 '+nome.toUpperCase() : '📦 Digite o nome do produto no Simulador'
+  h.className   = nome ? 'mp-product-header' : 'mp-product-header empty-header'
 }
 
-function renderChart(labels, data, colors){
-  $('chartArea').innerHTML = '<canvas id="grafico" style="max-width:240px;max-height:240px;"></canvas>'
+/* ── GRÁFICO ── */
+function renderChart(labels,data,colors){
+  $('chartArea').innerHTML='<canvas id="grafico" style="max-width:240px;max-height:240px;"></canvas>'
   if(chartInstance) chartInstance.destroy()
-  chartInstance = new Chart($('grafico'), {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{
-        data,
-        backgroundColor: colors,
-        borderWidth: 2,
-        borderColor: '#fff'
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12, padding: 10 } },
-        tooltip: { callbacks: { label: ctx => ` ${moeda(ctx.parsed)}` } }
-      },
-      cutout: '60%'
-    }
+  chartInstance = new Chart($('grafico'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff'}]},
+    options:{responsive:true,plugins:{
+      legend:{position:'bottom',labels:{font:{size:11},boxWidth:12,padding:10}},
+      tooltip:{callbacks:{label:ctx=>` ${moeda(ctx.parsed)}`}}
+    },cutout:'60%'}
   })
 }
 
+/* ── MARKETPLACES ── */
 function calcularMarketplaces(){
   if(!lastCalc) return
-  
-  const ids = ['ml1','mag1','ml2','mag2']
-  const resultados = []
-  
-  ids.forEach(id => {
-    const r = calcMkt(id)
-    if(r) resultados.push({id, ...r})
-  })
-  
+  const ids=['ml1','mag1','ml2','mag2']
+  const resultados=[]
+  ids.forEach(id=>{ const r=calcMkt(id); if(r) resultados.push({id,...r}) })
   atualizarRanking(resultados)
 }
 
@@ -645,187 +588,157 @@ function calcMkt(id){
 
   const taxa = (margem + extra + impostos + comissao) / 100
   if(taxa >= 1){
-    $('mktPreco_'+id).textContent = 'Inválido'
-    $('mktOriginal_'+id).textContent = '—'
-    $('mktLucro_'+id).textContent = '—'
-    $('mktMargemReal_'+id).textContent = '—'
-    $('mktPerda_'+id).textContent = '—'
-    $('mktAlerta_'+id).className = 'mp-alerta'
-    $('mktAlerta_'+id).textContent = ''
-    return null
+    ;['mktPreco_','mktOriginal_','mktLucro_','mktMargemReal_','mktPerda_'].forEach(p=>{ $(p+id).textContent='—' })
+    $('mktAlerta_'+id).className='mp-alerta'; $('mktAlerta_'+id).textContent=''; return null
   }
 
-  const custoBase = lastCalc.custoTotal + lastCalc.freteV + fixa
+  /* ── custoBase = custoProduto (SEM freteV) + freteV + taxa fixa ── */
+  const custoBase     = lastCalc.custoProduto + lastCalc.freteV + fixa
   const precoOriginal = custoBase / (1 - taxa)
-  const precoFinal = precoOriginal * (1 - desc / 100)
+  const precoFinal    = precoOriginal * (1 - desc / 100)
 
-  const valImp = precoFinal * (impostos / 100)
-  const valCom = precoFinal * (comissao / 100)
-  const lucro = precoFinal - custoBase - valImp - valCom
-  const mReal = precoFinal > 0 ? (lucro / precoFinal) * 100 : 0
+  const valImp = precoFinal * (impostos  / 100)
+  const valCom = precoFinal * (comissao  / 100)
+  const lucro  = precoFinal - custoBase - valImp - valCom
+  const mReal  = precoFinal > 0 ? (lucro / precoFinal) * 100 : 0
 
-  const lucroOriginal = precoOriginal - custoBase - precoOriginal*(impostos/100) - precoOriginal*(comissao/100)
-  const mRealOriginal = precoOriginal > 0 ? (lucroOriginal / precoOriginal) * 100 : 0
-  const perdaMargem = mRealOriginal - mReal
+  const lucroOrig  = precoOriginal - custoBase - precoOriginal*(impostos/100) - precoOriginal*(comissao/100)
+  const mRealOrig  = precoOriginal > 0 ? (lucroOrig / precoOriginal) * 100 : 0
+  const perdaMargem= mRealOrig - mReal
 
   $('mktOriginal_'+id).textContent = moeda(precoOriginal)
-  $('mktPreco_'+id).textContent = desc > 0 ? moeda(precoFinal) : moeda(precoOriginal)
+  $('mktPreco_'+id).textContent    = desc>0 ? moeda(precoFinal) : moeda(precoOriginal)
 
-  const perdaEl = $('mktPerda_'+id)
-  if(desc > 0){
-    perdaEl.textContent = '▼ ' + pct(perdaMargem)
-    perdaEl.className = 'cr-val ' + (perdaMargem > 5 ? 'perda-bad' : 'perda-ok')
-  } else {
-    perdaEl.textContent = 'Sem desconto'
-    perdaEl.className = 'cr-val'
-    perdaEl.style.color = 'var(--muted)'
-  }
+  const perdaEl=$('mktPerda_'+id); perdaEl.style.color=''
+  if(desc>0){ perdaEl.textContent='▼ '+pct(perdaMargem); perdaEl.className='cr-val '+(perdaMargem>5?'perda-bad':'perda-ok') }
+  else       { perdaEl.textContent='Sem desconto'; perdaEl.className='cr-val'; perdaEl.style.color='var(--muted)' }
 
-  const lEl = $('mktLucro_'+id)
-  lEl.textContent = moeda(lucro)
-  lEl.className = 'val ' + (lucro >= 0 ? 'green' : 'red')
+  const lEl=$('mktLucro_'+id); lEl.textContent=moeda(lucro); lEl.className='val '+(lucro>=0?'green':'red')
 
-  const badge = $('mktBadge_'+id)
-  if(badge){
-    badge.textContent = lucro >= 0 ? '✅ Lucrativo' : '❌ Prejuízo'
-    badge.className = 'badge-lucro ' + (lucro >= 0 ? 'badge-ok' : 'badge-bad')
-    badge.style.display = 'inline-block'
-  }
+  const badge=$('mktBadge_'+id)
+  badge.textContent=lucro>=0?'✅ Lucrativo':'❌ Prejuízo'
+  badge.className='badge-lucro '+(lucro>=0?'badge-ok':'badge-bad')
+  badge.style.display='inline-block'
 
-  $('mktMargemReal_'+id).textContent = pct(mReal)
+  $('mktMargemReal_'+id).textContent=pct(mReal)
 
-  const alertaEl = $('mktAlerta_'+id)
-  if(lucro < 0){
-    alertaEl.textContent = '🚨 PREJUÍZO: Revise desconto ou margem.'
-    alertaEl.className = 'mp-alerta alerta-prejuizo'
-  } else if(mReal < 5){
-    alertaEl.textContent = '⚠️ Margem baixa (< 5%). Risco de prejuízo.'
-    alertaEl.className = 'mp-alerta alerta-atencao'
-  } else {
-    alertaEl.textContent = '✅ Operação saudável.'
-    alertaEl.className = 'mp-alerta alerta-ok'
-  }
+  const alertaEl=$('mktAlerta_'+id)
+  if(lucro<0)       { alertaEl.textContent='🚨 PREJUÍZO: Revise desconto ou margem.'; alertaEl.className='mp-alerta alerta-prejuizo' }
+  else if(mReal<5)  { alertaEl.textContent='⚠️ Margem baixa (< 5%). Risco de prejuízo.'; alertaEl.className='mp-alerta alerta-atencao' }
+  else              { alertaEl.textContent='✅ Operação saudável.'; alertaEl.className='mp-alerta alerta-ok' }
 
-  return {preco: precoFinal, lucro, mReal}
+  return {preco:precoFinal, lucro, mReal}
 }
 
+/* ── RANKING ── */
 function atualizarRanking(resultados){
-  if(!resultados.length){
-    $('rankingList').innerHTML = '<div class="empty"><div class="ei">📈</div><p>Calcule para ver o ranking</p></div>'
-    return
-  }
-  const nomes = {ml1:'ML Linha 1', mag1:'Magalu Linha 1', ml2:'ML Linha 2', mag2:'Magalu Linha 2'}
-  const sorted = [...resultados].sort((a,b) => b.lucro - a.lucro)
-  $('rankingList').innerHTML = sorted.map((r,i) => {
-    const pos = i < 3 ? ['pos-1','pos-2','pos-3'][i] : 'pos-rest'
-    const medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : `${i+1}°`
-    return `<div class="ranking-row">
-      <div class="pos ${pos}">${medal}</div>
-      <div class="rname">${nomes[r.id] || r.id}</div>
-      <div class="rpreco">${moeda(r.preco)}</div>
-      <div class="rlucro ${r.lucro>=0 ? 'green' : 'red'}">${moeda(r.lucro)}</div>
-      <div class="rmargem">${pct(r.mReal)}</div>
-    </div>`
+  if(!resultados.length){ $('rankingList').innerHTML='<div class="empty"><div class="ei">📈</div><p>Calcule para ver o ranking</p></div>'; return }
+  const nomes={ml1:'ML Linha 1',mag1:'Magalu Linha 1',ml2:'ML Linha 2',mag2:'Magalu Linha 2'}
+  const sorted=[...resultados].sort((a,b)=>b.lucro-a.lucro)
+  $('rankingList').innerHTML=sorted.map((r,i)=>{
+    const pos=i<3?['pos-1','pos-2','pos-3'][i]:'pos-rest'
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}°`
+    return `<div class="ranking-row"><div class="pos ${pos}">${medal}</div><div class="rname">${nomes[r.id]||r.id}</div><div class="rpreco">${moeda(r.preco)}</div><div class="rlucro ${r.lucro>=0?'green':'red'}">${moeda(r.lucro)}</div><div class="rmargem">${pct(r.mReal)}</div></div>`
   }).join('')
 }
 
-/* UTILITÁRIOS */
+/* ── HISTÓRICO (CORRIGIDO) ── */
 function salvarHistorico(){
-  if(!lastCalc){ toast('⚠️ Calcule primeiro'); return }
+  if(!lastCalc){ toast('⚠️ Calcule primeiro antes de salvar'); return }
   const nome = $('nomeProduto').value.trim() || `Produto ${historico.length+1}`
-  historico.push({nome, ...lastCalc, data: now()})
+  /* copia explicitamente os campos necessários para evitar referência */
+  historico.push({
+    nome,
+    data        : now(),
+    custoTotal  : lastCalc.custoTotal,
+    custoProduto: lastCalc.custoProduto,
+    freteV      : lastCalc.freteV,
+    preco       : lastCalc.preco,
+    lucro       : lastCalc.lucro,
+    margemReal  : lastCalc.margemReal,
+    precoManual : lastCalc.precoManual
+  })
   renderHistorico()
-  toast('💾 Salvo!')
+  toast('💾 Simulação salva com sucesso!')
 }
 
 function renderHistorico(){
-  if(!historico.length){
-    $('histContent').innerHTML = '<div class="hist-empty">Nenhuma simulação salva.</div>'
-    return
-  }
-  let html = `<div style="overflow-x:auto">
-    <table class="hist-table">
-      <thead><tr>
-        <th>#</th><th>Produto</th><th>Data</th><th>Custo Total</th><th>Preço Venda</th><th>Lucro</th><th>Margem Real</th><th></th>
-      </tr></thead><tbody>`
-  historico.forEach((h,i) => {
-    html += `<tr>
+  if(!historico.length){ $('histContent').innerHTML='<div class="hist-empty">Nenhuma simulação salva ainda.</div>'; return }
+  let html=`<div style="overflow-x:auto"><table class="hist-table"><thead><tr>
+    <th>#</th><th>Produto</th><th>Data</th><th>Custo Produto</th><th>Frete Venda</th><th>Custo Final</th><th>Preço Venda</th><th>Lucro</th><th>Margem Real</th><th></th>
+  </tr></thead><tbody>`
+  historico.forEach((h,i)=>{
+    const manualTag = h.precoManual>0 ? ' <span style="font-size:10px;background:#f59e0b;color:#fff;padding:2px 6px;border-radius:999px;font-weight:700;">MANUAL</span>' : ''
+    html+=`<tr>
       <td>${i+1}</td>
       <td><strong>${h.nome}</strong></td>
       <td style="color:var(--muted);font-size:12px">${h.data}</td>
+      <td>${moeda(h.custoProduto)}</td>
+      <td>${h.freteV>0?moeda(h.freteV):'—'}</td>
       <td>${moeda(h.custoTotal)}</td>
-      <td><strong>${moeda(h.preco)}</strong></td>
-      <td style="color:${h.lucro>=0 ? 'var(--success)' : 'var(--danger)'}"><strong>${moeda(h.lucro)}</strong></td>
+      <td><strong>${moeda(h.preco)}</strong>${manualTag}</td>
+      <td style="color:${h.lucro>=0?'var(--success)':'var(--danger)'}"><strong>${moeda(h.lucro)}</strong></td>
       <td style="color:var(--warning)">${pct(h.margemReal)}</td>
       <td><button class="btn btn-secondary" style="padding:6px 10px;font-size:11px;min-width:unset" onclick="removerHistorico(${i})">🗑️</button></td>
     </tr>`
   })
-  html += '</tbody></table></div>'
-  $('histContent').innerHTML = html
+  html+='</tbody></table></div>'
+  $('histContent').innerHTML=html
 }
 
-function removerHistorico(i){
-  historico.splice(i,1)
-  renderHistorico()
-  toast('🗑️ Removido')
-}
+function removerHistorico(i){ historico.splice(i,1); renderHistorico(); toast('🗑️ Registro removido') }
+function limparHistorico(){ historico=[]; renderHistorico(); toast('🗑️ Histórico limpo') }
 
-function limparHistorico(){
-  historico = []
-  renderHistorico()
-  toast('🗑️ Histórico limpo')
-}
-
+/* ── COPIAR ── */
 function copiarResultado(){
   if(!lastCalc){ toast('⚠️ Calcule primeiro'); return }
-  const nome = $('nomeProduto').value.trim() || 'Produto'
-  const txt = `${nome}\nPreço: ${moeda(lastCalc.preco)}\nCusto: ${moeda(lastCalc.custoTotal)}\nLucro: ${moeda(lastCalc.lucro)}\nMargem: ${pct(lastCalc.margemReal)}`
-  navigator.clipboard.writeText(txt).then(() => toast('📋 Copiado!')).catch(() => toast('⚠️ Erro ao copiar'))
+  const nome=$('nomeProduto').value.trim()||'Produto'
+  const txt=`${nome}\nPreço: ${moeda(lastCalc.preco)}\nCusto produto: ${moeda(lastCalc.custoProduto)}\nFrete venda: ${moeda(lastCalc.freteV)}\nCusto final: ${moeda(lastCalc.custoTotal)}\nLucro: ${moeda(lastCalc.lucro)}\nMargem: ${pct(lastCalc.margemReal)}`
+  navigator.clipboard.writeText(txt).then(()=>toast('📋 Copiado!')).catch(()=>toast('⚠️ Erro ao copiar'))
 }
 
+/* ── PDF ── */
 function exportarPDF(){
-  if(!lastCalc){ toast('⚠️ Calcule antes'); return }
-  html2pdf().set({
-    margin:10, filename:'simulacao_v33.pdf', image:{type:'jpeg',quality:.98},
-    html2canvas:{scale:2,useCORS:true}, jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  }).from($('pdf-area')).save()
+  if(!lastCalc){ toast('⚠️ Calcule antes de gerar PDF'); return }
+  html2pdf().set({margin:10,filename:'simulacao_v36.pdf',image:{type:'jpeg',quality:.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from($('pdf-area')).save()
   toast('📄 PDF gerado!')
 }
 
+/* ── RESET UI ── */
 function resetUI(){
-  $('precoVenda').textContent = 'R$ —'
-  $('heroSub').textContent = 'Preencha os campos ao lado'
-  $('sCusto').textContent = 'R$ —'
-  $('sMargem').textContent = 'R$ —'
-  $('sLucro').textContent = 'R$ —'
-  $('sLucro').className = 'svalue green'
-  $('sMargemReal').textContent = '— %'
-  $('bkContent').innerHTML = '<div class="empty"><div class="ei">🔢</div><p>Preencha os campos</p></div>'
-  $('chartArea').innerHTML = '<div class="empty"><div class="ei">📊</div><p>Preencha os campos</p></div>'
-  if(chartInstance){ chartInstance.destroy(); chartInstance = null }
-  lastCalc = null
+  $('precoVenda').textContent='R$ —'
+  $('heroSub').textContent='Preencha os campos ao lado'
+  $('manualBadge').style.display='none'
+  $('sCusto').textContent='R$ —'; $('sMargem').textContent='R$ —'
+  $('sLucro').textContent='R$ —'; $('sLucro').className='svalue green'
+  $('sMargemReal').textContent='— %'
+  $('bkContent').innerHTML='<div class="empty"><div class="ei">🔢</div><p>Preencha os campos</p></div>'
+  $('chartArea').innerHTML='<div class="empty"><div class="ei">📊</div><p>Preencha os campos</p></div>'
+  $('custoGrid').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="ei">🔢</div><p>Calcule no simulador para ver os custos</p></div>'
+  $('freteVendaBloco').style.display='none'
+  $('rankingList').innerHTML='<div class="empty"><div class="ei">📈</div><p>Calcule no simulador para ver o ranking</p></div>'
+  if(chartInstance){ chartInstance.destroy(); chartInstance=null }
+  lastCalc=null
 }
 
+/* ── LIMPAR ── */
 function limpar(){
-  // Limpa apenas campos não padrão
-  ;['custo','freteVenda','outrasReais','outrasPct','nomeProduto'].forEach(id => $(id).value = '')
-  resetUI()
-  atualizarHeaderProduto()
-  toast('🗑️ Limpo!')
+  ;['custo','freteVenda','outrasReais','outrasPct','nomeProduto','precoManual'].forEach(id=>{$(id).value=''})
+  $('cambio').value='1'; $('freteCompra').value='28'; $('margem').value='20'; $('impostos').value='2'; $('comissao').value='18'
+  syncMargensMarketplaces(); syncComissoesMarketplaces()
+  resetUI(); atualizarHeaderProduto()
+  toast('🗑️ Campos limpos!')
 }
 
+/* ── INIT ── */
 $('nomeProduto').addEventListener('input', atualizarHeaderProduto)
-
-// 🚀 INICIALIZAÇÃO - sincronização sempre ativa
 syncMargensMarketplaces()
 syncComissoesMarketplaces()
-
 </script>
 </body>
-  <br>
 
-  <h6>Adailton de Jesus Silva.</h6>
-  <h6>Todos os direitos reservados.</h6>
-  <h6>Contato 45 99956-0137</h6>
-
+  <p> Todos os direitos reservados</p>
+  <p> Adailton J. Silva</p>
+  <p> Contato: 45 99956-0137</p>
+  
 </html>
